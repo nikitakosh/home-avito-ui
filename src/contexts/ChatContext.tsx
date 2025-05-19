@@ -29,6 +29,10 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   
   const stompClient = useRef<Stomp.Client | null>(null);
 
+  const API_BASE_URL = (window as any).APP_CONFIG?.API_BASE_URL || 'http://localhost:8080';
+  const wsUrl = new URL('/ws', API_BASE_URL);
+  wsUrl.protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
   // Connect to WebSocket when authenticated and component mounts
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -61,7 +65,7 @@ export const ChatProvider: React.FC<ChatProviderProps> = ({ children }) => {
   }, [isAuthenticated, refreshUserInfo]);
 
   const connect = () => {
-    const socket = new SockJS('http://localhost:8080/ws');
+    const socket = new SockJS(wsUrl.toString());
     stompClient.current = Stomp.over(socket);
     
     stompClient.current.connect(
